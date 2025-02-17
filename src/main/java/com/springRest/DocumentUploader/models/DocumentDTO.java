@@ -1,0 +1,27 @@
+package com.springRest.DocumentUploader.models;
+
+import lombok.Builder;
+import lombok.Data;
+
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.UUID;
+
+@Data
+@Builder
+public class DocumentDTO {
+    private UUID id;
+
+    private String fileName;
+
+    private String contentType;
+
+    private String description;
+
+    private Timestamp notifyAt;
+
+    private Timestamp createdAt;
+
+    private Timestamp updatedAt;
+
+}
