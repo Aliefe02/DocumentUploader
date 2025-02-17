@@ -35,6 +35,9 @@ public class Document {
     @Column(length = 36, columnDefinition = "varchar(36)")
     private String contentType;
 
+    @Column(length = 255, columnDefinition = "varchar(255)")
+    private String description;
+
     @ManyToOne
     private User user;
 

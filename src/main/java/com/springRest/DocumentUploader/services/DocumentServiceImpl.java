@@ -35,15 +35,15 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public Optional<DocumentDTO> getDocumentByUserAndId(UUID documentId, User user) {
+    public Optional<DocumentDTO> getDocumentByUserAndId(User user, UUID id) {
 
-        return Optional.ofNullable(documentMapper.documentToDocumentDto(documentRepository.findByUserAndId(user, documentId).orElse(null)));
+        return Optional.ofNullable(documentMapper.documentToDocumentDto(documentRepository.findByIdAndUser(id, user).orElse(null)));
     }
 
     @Override
-    public Page<Document> listDocuments(User user, Integer pageNumber, Integer pageSize) {
+    public Page<DocumentDTO> listDocuments(User user, Integer pageNumber, Integer pageSize) {
         PageRequest pageRequest = buildPageRequest(pageNumber, pageSize);
-        return documentRepository.findAllByUser(user, pageRequest);
+        return documentRepository.findAllByUser(user, pageRequest).map(documentMapper::documentToDocumentDto);
     }
 
     public PageRequest buildPageRequest(Integer pageNumber, Integer pageSize){
@@ -69,8 +69,8 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public boolean deleteById(UUID documentId) {
-        if (documentRepository.existsById(documentId)){
+    public boolean deleteById(UUID documentId, User user) {
+        if (documentRepository.existsByIdAndUser(documentId, user)){
             documentRepository.deleteById(documentId);
             return true;
         }

@@ -13,9 +13,9 @@ import java.util.UUID;
 public interface DocumentService {
     DocumentDTO uploadDocument(DocumentDTO document, User user);
 
-    Optional<DocumentDTO> getDocumentByUserAndId(UUID documentId, User user);
+    Optional<DocumentDTO> getDocumentByUserAndId(User user, UUID id);
 
-    Page<Document> listDocuments(User user, Integer pageNumber, Integer pageSize);
+    Page<DocumentDTO> listDocuments(User user, Integer pageNumber, Integer pageSize);
 
-    boolean deleteById(UUID documentId);
+    boolean deleteById(UUID documentId, User user);
 }

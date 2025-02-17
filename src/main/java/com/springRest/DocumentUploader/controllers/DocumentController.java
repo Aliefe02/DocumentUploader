@@ -5,16 +5,26 @@ import com.springRest.DocumentUploader.entity.User;
 import com.springRest.DocumentUploader.models.DocumentDTO;
 import com.springRest.DocumentUploader.services.DocumentService;
 import com.springRest.DocumentUploader.services.UserService;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import static com.springRest.DocumentUploader.controllers.UserController.getUserFromToken;
@@ -22,41 +32,95 @@ import static com.springRest.DocumentUploader.controllers.UserController.getUser
 @Slf4j
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/document/")
 public class DocumentController {
     private final DocumentService documentService;
     private final UserService userService;
 
-    @PostMapping("/document/upload")
-    public ResponseEntity<DocumentDTO> createNewDocument(@Validated @RequestBody DocumentDTO document){
-        User user = getUserFromToken(userService);
+    private final String storagePath = System.getProperty("user.dir") + "/uploads/";
 
-        DocumentDTO savedDocument = documentService.uploadDocument(document, user);
+    @PostMapping(value = "upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<DocumentDTO> uploadDocument(@RequestParam("file") MultipartFile file,
+                                                      @RequestParam("description") String description) {
+        try {
+            File directory = new File(storagePath);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Location", "/document/" + savedDocument.getId());
-        return new ResponseEntity<>(savedDocument, headers, HttpStatus.CREATED);
+            String filePath = storagePath + file.getOriginalFilename();
+            File newFile = new File(filePath);
+
+            file.transferTo(newFile);
+
+            if (!newFile.exists()) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            }
+
+
+
+            DocumentDTO documentDTO = new DocumentDTO();
+            documentDTO.setFileName(file.getOriginalFilename());
+            documentDTO.setContentType(file.getContentType());
+            documentDTO.setDescription(description);
+
+            User user = getUserFromToken(userService);
+
+            DocumentDTO savedDocument = documentService.uploadDocument(documentDTO, user);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Location", "/document/" + savedDocument.getFileName());
+
+            return new ResponseEntity<>(savedDocument, headers, HttpStatus.CREATED);
+        } catch (IOException e) {
+            e.printStackTrace(); // Log the exception
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
-    @GetMapping("/document/{id}")
+    @GetMapping("media/{id}")
+    public ResponseEntity<Resource> getFile(@PathVariable("id") UUID id) throws IOException{
+        User user = getUserFromToken(userService);
+
+        DocumentDTO documentDTO = documentService.getDocumentByUserAndId(user, id).orElseThrow(NotFoundException::new);
+        String fileName = documentDTO.getFileName();
+
+        Path filePath = Paths.get(storagePath).resolve(fileName).normalize();
+        Resource resource = new UrlResource(filePath.toUri());
+
+        if (!resource.exists()){
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = Files.probeContentType(filePath);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(resource);
+    }
+
+
+
+    @GetMapping("{id}")
     public DocumentDTO getDocumentById(@PathVariable("id") UUID id){
         User user = getUserFromToken(userService);
-        return documentService.getDocumentByUserAndId(id, user).orElseThrow(NotFoundException::new);
+        return documentService.getDocumentByUserAndId(user, id).orElseThrow(NotFoundException::new);
     }
 
-    @DeleteMapping("/document/{id}")
+    @DeleteMapping("{id}")
     public ResponseEntity<DocumentDTO> deleteById(@PathVariable("id") UUID id){
-        if (!documentService.deleteById(id)){
+        User user = getUserFromToken(userService);
+        if (!documentService.deleteById(id, user)){
             throw new NotFoundException();
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/document")
-    public Page<Document> listDocuments(@RequestParam(required = true) String username,
-                                           @RequestParam(required = false) Integer pageSize,
-                                           @RequestParam(required = false) Integer pageNumber){
+    @GetMapping("all")
+    public Page<DocumentDTO> listDocuments(@RequestParam(required = false) Integer pageSize,
+                                        @RequestParam(required = false) Integer pageNumber){
 
-        User user = userService.getUserEntityByUsername(username).orElseThrow(NotFoundException::new);
+        User user = getUserFromToken(userService);
+
         return documentService.listDocuments(user, pageNumber, pageSize);
     }
 

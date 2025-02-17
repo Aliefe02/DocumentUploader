@@ -1,7 +1,6 @@
 package com.springRest.DocumentUploader.models;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -9,6 +8,8 @@ import java.util.UUID;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DocumentDTO {
     private UUID id;
 
