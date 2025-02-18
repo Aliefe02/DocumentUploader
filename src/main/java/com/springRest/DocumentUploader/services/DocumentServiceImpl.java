@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RequiredArgsConstructor
 @Service
@@ -36,8 +37,18 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public Optional<DocumentDTO> getDocumentByUserAndId(User user, UUID id) {
-
         return Optional.ofNullable(documentMapper.documentToDocumentDto(documentRepository.findByIdAndUser(id, user).orElse(null)));
+    }
+
+    @Override
+    public Optional<DocumentDTO> updateDescriptionById(User user, UUID id, DocumentDTO documentDto) {
+        Document document = documentRepository.findByIdAndUser(id, user).orElse(null);
+        if (document != null){
+            document.setDescription(documentDto.getDescription());
+            document = documentRepository.save(document);
+        }
+
+        return Optional.of(documentMapper.documentToDocumentDto(document));
     }
 
     @Override
@@ -69,11 +80,15 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public boolean deleteById(UUID documentId, User user) {
-        if (documentRepository.existsByIdAndUser(documentId, user)){
-            documentRepository.deleteById(documentId);
-            return true;
+    public String deleteById(UUID documentId, User user) {
+        Document document = documentRepository.findByIdAndUser(documentId, user).orElse(null);
+
+        if (document != null){
+            String fileName = document.getFileName();
+            documentRepository.delete(document);
+            return fileName;
         }
-        return false;
+
+        return null;
     }
 }

@@ -19,8 +19,6 @@ public class DocumentDTO {
 
     private String description;
 
-    private Timestamp notifyAt;
-
     private Timestamp createdAt;
 
     private Timestamp updatedAt;

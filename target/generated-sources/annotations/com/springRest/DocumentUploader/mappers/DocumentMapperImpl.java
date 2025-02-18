@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-02-17T23:54:22+0300",
+    date = "2025-02-19T00:33:21+0300",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 21.0.6 (Ubuntu)"
 )
 @Component
@@ -21,12 +21,12 @@ public class DocumentMapperImpl implements DocumentMapper {
 
         Document.DocumentBuilder document = Document.builder();
 
+        document.description( dto.getDescription() );
         document.id( dto.getId() );
         document.fileName( dto.getFileName() );
         document.contentType( dto.getContentType() );
         document.createdAt( dto.getCreatedAt() );
         document.updatedAt( dto.getUpdatedAt() );
-        document.notifyAt( dto.getNotifyAt() );
 
         return document.build();
     }
@@ -39,10 +39,10 @@ public class DocumentMapperImpl implements DocumentMapper {
 
         DocumentDTO.DocumentDTOBuilder documentDTO = DocumentDTO.builder();
 
+        documentDTO.description( document.getDescription() );
         documentDTO.id( document.getId() );
         documentDTO.fileName( document.getFileName() );
         documentDTO.contentType( document.getContentType() );
-        documentDTO.notifyAt( document.getNotifyAt() );
         documentDTO.createdAt( document.getCreatedAt() );
         documentDTO.updatedAt( document.getUpdatedAt() );
 

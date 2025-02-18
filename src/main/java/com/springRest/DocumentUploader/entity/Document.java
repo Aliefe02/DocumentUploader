@@ -48,8 +48,6 @@ public class Document {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
-    private Timestamp notifyAt;
-
 }
 
 

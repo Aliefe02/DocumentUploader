@@ -1,22 +1,18 @@
 package com.springRest.DocumentUploader.controllers;
 
-import com.springRest.DocumentUploader.entity.Document;
 import com.springRest.DocumentUploader.entity.User;
 import com.springRest.DocumentUploader.models.DocumentDTO;
 import com.springRest.DocumentUploader.services.DocumentService;
 import com.springRest.DocumentUploader.services.UserService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -89,13 +85,18 @@ public class DocumentController {
         Resource resource = new UrlResource(filePath.toUri());
 
         if (!resource.exists()){
-            return ResponseEntity.notFound().build();
-        }
+            return ResponseEntity.notFound().build();       }
 
         String contentType = Files.probeContentType(filePath);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .body(resource);
+    }
+
+    @PatchMapping("{id}")
+    public DocumentDTO updateDocumentDescription(@PathVariable("id") UUID id, @RequestBody() DocumentDTO documentDto){
+        User user = getUserFromToken(userService);
+        return documentService.updateDescriptionById(user, id, documentDto).orElseThrow(NotFoundException::new);
     }
 
 
@@ -109,8 +110,15 @@ public class DocumentController {
     @DeleteMapping("{id}")
     public ResponseEntity<DocumentDTO> deleteById(@PathVariable("id") UUID id){
         User user = getUserFromToken(userService);
-        if (!documentService.deleteById(id, user)){
-            throw new NotFoundException();
+        String fileName = documentService.deleteById(id, user);
+        if (fileName == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Path filePath = Paths.get("uploads", fileName);
+        try{
+            Files.delete(filePath);
+        } catch (IOException e){
+            throw new RuntimeException("Failed to delete file: " + filePath, e);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
