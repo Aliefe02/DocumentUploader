@@ -4,6 +4,7 @@ package com.springRest.DocumentUploader.models;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Builder
@@ -17,7 +18,7 @@ public class NotificationDTO {
 
     private String description;
 
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     private UUID userId;
 

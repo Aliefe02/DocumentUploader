@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static com.springRest.DocumentUploader.controllers.UserController.getUserFromToken;
@@ -37,7 +39,8 @@ public class DocumentController {
 
     @PostMapping(value = "upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DocumentDTO> uploadDocument(@RequestParam("file") MultipartFile file,
-                                                      @RequestParam("description") String description) {
+                                                      @RequestParam("description") String description,
+                                                      @RequestParam("notifyAt") LocalDateTime notifyAt) {
         try {
             File directory = new File(storagePath);
             if (!directory.exists()) {
@@ -59,6 +62,7 @@ public class DocumentController {
             documentDTO.setFileName(file.getOriginalFilename());
             documentDTO.setContentType(file.getContentType());
             documentDTO.setDescription(description);
+            documentDTO.setNotifyAt(notifyAt);
 
             User user = getUserFromToken(userService);
 
@@ -69,7 +73,7 @@ public class DocumentController {
 
             return new ResponseEntity<>(savedDocument, headers, HttpStatus.CREATED);
         } catch (IOException e) {
-            e.printStackTrace(); // Log the exception
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

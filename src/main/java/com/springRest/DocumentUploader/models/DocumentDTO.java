@@ -2,8 +2,7 @@ package com.springRest.DocumentUploader.models;
 
 import lombok.*;
 
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -19,9 +18,9 @@ public class DocumentDTO {
 
     private String description;
 
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
-    private Timestamp updatedAt;
+    private LocalDateTime updatedAt;
 
-    private Timestamp notifyAt;
+    private LocalDateTime notifyAt;
 }

@@ -2,7 +2,7 @@ package com.springRest.DocumentUploader.models;
 
 import lombok.*;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -20,7 +20,7 @@ public class UserDTO {
 
     private String password;
 
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
 }

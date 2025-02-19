@@ -9,6 +9,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -30,7 +31,7 @@ public class Notification {
 
     @CreationTimestamp
     @Column(updatable = false)
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     @OneToOne
     @JoinColumn(name = "document_id", referencedColumnName = "id", nullable = false, unique = true)

@@ -29,12 +29,12 @@ public class NotificationJob implements Job {
     private DocumentService documentService;
 
     @Override
-    public void execute(JobExecutionContext context){
+    public void execute(JobExecutionContext context) {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
-        String name = dataMap.getString("name");
+
         String description = dataMap.getString("description");
         UUID userId = UUID.fromString(dataMap.getString("userId"));
-        UUID documentId = UUID.fromString(dataMap.getString("documentID"));
+        UUID documentId = UUID.fromString(dataMap.getString("documentId"));
 
         User user = userService.getUserEntityById(userId).orElseThrow(NotFoundException::new);
         Document document = documentService.getDocumentEntityById(documentId).orElseThrow(NotFoundException::new);
@@ -46,7 +46,10 @@ public class NotificationJob implements Job {
                 .build();
 
         NotificationDTO savedNotification = notificationService.createNotification(notification);
+
+        System.out.println("New notification is created for " + user.getUsername() + " documentId: "+ documentId);
     }
+
 }
 
 
