@@ -8,10 +8,13 @@ import com.springRest.DocumentUploader.repositories.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.springRest.DocumentUploader.services.DocumentServiceImpl.buildPageRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -24,12 +27,13 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Optional<NotificationDTO> getNotificationById(User user, UUID id) {
-        return Optional.empty();
+        return Optional.of(notificationMapper.notificationToNotificationDto(notificationRepository.findByUserAndId(user, id)));
     }
 
     @Override
     public Page<NotificationDTO> listNotifications(User user, Integer pageNumber, Integer pageSize) {
-        return null;
+        PageRequest pageRequest = buildPageRequest(pageNumber, pageSize);
+        return notificationRepository.findAllByUser(user, pageRequest).map(notificationMapper::notificationToNotificationDto);
     }
 
     @Override

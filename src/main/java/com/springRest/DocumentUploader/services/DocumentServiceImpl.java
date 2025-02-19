@@ -81,7 +81,7 @@ public class DocumentServiceImpl implements DocumentService {
         return documentRepository.findAllByUser(user, pageRequest).map(documentMapper::documentToDocumentDto);
     }
 
-    public PageRequest buildPageRequest(Integer pageNumber, Integer pageSize){
+    public static PageRequest buildPageRequest(Integer pageNumber, Integer pageSize){
         int queryPageNumber;
         int queryPageSize;
         if (pageNumber != null && pageNumber > 0){
