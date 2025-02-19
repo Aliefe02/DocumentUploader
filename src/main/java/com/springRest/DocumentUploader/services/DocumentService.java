@@ -15,9 +15,12 @@ public interface DocumentService {
 
     Optional<DocumentDTO> getDocumentByUserAndId(User user, UUID id);
 
-    Optional<DocumentDTO> updateDescriptionById(User user, UUID id, DocumentDTO documentDto);
+    Optional<DocumentDTO> updateDocumentbyId(User user, UUID id, DocumentDTO documentDto);
 
     Page<DocumentDTO> listDocuments(User user, Integer pageNumber, Integer pageSize);
 
     String deleteById(UUID documentId, User user);
+
+    Optional<Document> getDocumentEntityById(UUID id);
+
 }

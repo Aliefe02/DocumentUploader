@@ -1,2 +1,3 @@
+#!/bin/bash
 mvn flyway:repair     -Dflyway.url=jdbc:mysql://127.0.0.1:3306/documentuploader     -Dflyway.user=documentadmin     -Dflyway.password=password
 mvn flyway:migrate     -Dflyway.url=jdbc:mysql://127.0.0.1:3306/documentuploader     -Dflyway.user=documentadmin     -Dflyway.password=password

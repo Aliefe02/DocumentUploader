@@ -96,10 +96,8 @@ public class DocumentController {
     @PatchMapping("{id}")
     public DocumentDTO updateDocumentDescription(@PathVariable("id") UUID id, @RequestBody() DocumentDTO documentDto){
         User user = getUserFromToken(userService);
-        return documentService.updateDescriptionById(user, id, documentDto).orElseThrow(NotFoundException::new);
+        return documentService.updateDocumentbyId(user, id, documentDto).orElseThrow(NotFoundException::new);
     }
-
-
 
     @GetMapping("{id}")
     public DocumentDTO getDocumentById(@PathVariable("id") UUID id){

@@ -8,6 +8,7 @@ import com.springRest.DocumentUploader.models.UserDTO;
 import com.springRest.DocumentUploader.repositories.DocumentRepository;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,9 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 public class DocumentServiceImpl implements DocumentService {
 
+    @Autowired
+    private NotificationSchedulerService notificationSchedulerService;
+
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_PAGE_SIZE = 25;
     
@@ -32,7 +36,16 @@ public class DocumentServiceImpl implements DocumentService {
     public DocumentDTO uploadDocument(DocumentDTO document, User user) {
         Document newDocument = documentMapper.documentDtoToDocument(document);
         newDocument.setUser(user);
-        return documentMapper.documentToDocumentDto(documentRepository.save(newDocument));
+        newDocument = documentRepository.save(newDocument);
+
+        notificationSchedulerService.scheduleNotification(
+                newDocument.getId(),
+                user.getId(),
+                newDocument.getDescription(),
+                newDocument.getNotifyAt()
+        );
+
+        return documentMapper.documentToDocumentDto(newDocument);
     }
 
     @Override
@@ -41,11 +54,22 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public Optional<DocumentDTO> updateDescriptionById(User user, UUID id, DocumentDTO documentDto) {
+    public Optional<DocumentDTO> updateDocumentbyId(User user, UUID id, DocumentDTO documentDto) {
         Document document = documentRepository.findByIdAndUser(id, user).orElse(null);
         if (document != null){
-            document.setDescription(documentDto.getDescription());
+            if (documentDto.getDescription() != null) {
+                document.setDescription(documentDto.getDescription());
+            }
+            if (documentDto.getNotifyAt() != null){
+                document.setNotifyAt(documentDto.getNotifyAt());
+            }
             document = documentRepository.save(document);
+            notificationSchedulerService.deleteNotificationJob(document.getId());
+            notificationSchedulerService.scheduleNotification(
+                    document.getId(),
+                    user.getId(),
+                    document.getDescription(),
+                    document.getNotifyAt());
         }
 
         return Optional.of(documentMapper.documentToDocumentDto(document));
@@ -86,9 +110,15 @@ public class DocumentServiceImpl implements DocumentService {
         if (document != null){
             String fileName = document.getFileName();
             documentRepository.delete(document);
+            notificationSchedulerService.deleteNotificationJob(documentId);
             return fileName;
         }
 
         return null;
+    }
+
+    @Override
+    public Optional<Document> getDocumentEntityById(UUID id) {
+        return documentRepository.findById(id);
     }
 }

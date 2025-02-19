@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -17,7 +17,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Document {
+public class Notification {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -26,30 +26,20 @@ public class Document {
     @Column(length = 36, columnDefinition = "varchar(36)", updatable = false, nullable = false)
     private UUID id;
 
-    private String fileName;
-
-    private String contentType;
-
     private String description;
-
-    @OneToOne(mappedBy = "document", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Notification notification;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
-    private User user;
 
     @CreationTimestamp
     @Column(updatable = false)
     private Timestamp createdAt;
 
-    @UpdateTimestamp
-    private Timestamp updatedAt;
+    @OneToOne
+    @JoinColumn(name = "document_id", referencedColumnName = "id", nullable = false, unique = true)
+    private Document document;
 
-    private Timestamp notifyAt;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private User user;
 }
-
-
 
 
 

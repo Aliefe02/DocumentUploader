@@ -23,4 +23,5 @@ public class DocumentDTO {
 
     private Timestamp updatedAt;
 
+    private Timestamp notifyAt;
 }
